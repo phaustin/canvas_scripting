@@ -6,8 +6,11 @@ import os
 
 import requests
 import logging
+from collections import defaultdict
 
-debug = False
+course_dict = defaultdict(lambda: defaultdict(dict))
+
+debug = True
 if debug:
     # Enabling debugging at http.client level (requests->urllib3->http.client)
     # you will see the REQUEST, including HEADERS and DATA, and RESPONSE with HEADERS but without DATA.
@@ -50,7 +53,7 @@ for item in courses:
 #
 # find all modules in cource
 #
-course_name='box'
+course_name='e340'
 course=canvas.get_course(keep[course_name])
 modules=course.get_modules()
 #
@@ -60,16 +63,16 @@ module_name='assignpha'
 module_dict=dict()
 for item in modules:
     module_dict[item.name]=item
-    if item.name.find(module_name) > -1:
-        assign_module=item
 #
 # change the module name and write back tuo canvas
 #
 print(f'found module: {assign_module}')
-assign_module.edit(module={'name':'assignphaVV'})
+assign_module.edit(module={'name':'assignphaVV','published':True})
 new_module=course.get_module(assign_module.id)
 star10='*'*10
 print(f'\n{star10}\nchanged module name to {new_module.name}\n{star10}\n')
+all_items=list(new_module.get_module_items())
+out=dict(courseid=course.id,moduleid=assign_module.id)
 pdb.set_trace()
 
 
