@@ -6,11 +6,21 @@ import os
 
 import requests
 import logging
-from collections import defaultdict
+import json
 
-course_dict = defaultdict(lambda: defaultdict(dict))
+def flatten(module_list):
+    """
+    Given a list of modules return a list of dictionaries of all module items
+    """
+    outlist=dict()
+    for module in module_list:
+        outlist[module.id]=dict(name=module.name,items=[])
+        items=module.get_module_items()
+        for an_item in items:
+            outlist[module.id]['items'].append(json.loads(an_item.to_json()))
+    return outlist
 
-debug = True
+debug = False
 if debug:
     # Enabling debugging at http.client level (requests->urllib3->http.client)
     # you will see the REQUEST, including HEADERS and DATA, and RESPONSE with HEADERS but without DATA.
@@ -56,24 +66,19 @@ for item in courses:
 course_name='e340'
 course=canvas.get_course(keep[course_name])
 modules=course.get_modules()
-#
-# now grab the module with assignpha in the name
-#
-module_name='assignpha'
-module_dict=dict()
-for item in modules:
-    module_dict[item.name]=item
+module_list=flatten(modules)
+
 #
 # change the module name and write back tuo canvas
 #
-print(f'found module: {assign_module}')
-assign_module.edit(module={'name':'assignphaVV','published':True})
-new_module=course.get_module(assign_module.id)
-star10='*'*10
-print(f'\n{star10}\nchanged module name to {new_module.name}\n{star10}\n')
-all_items=list(new_module.get_module_items())
-out=dict(courseid=course.id,moduleid=assign_module.id)
-pdb.set_trace()
+# print(f'found module: {assign_module}')
+# assign_module.edit(module={'name':'assignphaVV','published':True})
+# new_module=course.get_module(assign_module.id)
+# star10='*'*10
+# print(f'\n{star10}\nchanged module name to {new_module.name}\n{star10}\n')
+# all_items=list(new_module.get_module_items())
+# out=dict(courseid=course.id,moduleid=assign_module.id)
+#pdb.set_trace()
 
 
 
