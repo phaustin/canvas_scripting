@@ -1,6 +1,8 @@
 from collections import namedtuple, defaultdict
 import pandas as pd
 import numpy as np
+from collections import defaultdict
+import pdb
 
 def make_tuple(in_dict,tupname='values'):
     """
@@ -101,26 +103,40 @@ def start_logging():
     return requests_log
 
 
-def login_courses():
+def login_courses(canvas_site='live'):
     my_home=Path(os.environ['HOME'])
     full_path=my_home / Path('.canvas.json')
     with open(full_path,'r') as f:
         secret_dict=json.load(f)
-    token=secret_dict['token']
+    sites={'test':{'token':'test_token',
+             'url':'Https://ubc.test.instructure.com'},
+           'live':{'token':'live_token',
+             'url':'https://canvas.ubc.ca'}}
+    token=secret_dict[sites[canvas_site]['token']]
     #
     # set up short names for canvas courses
     #
-    API_URL = "https://canvas.ubc.ca"
+    API_URL = sites[canvas_site]['url']
+    print(f'logging into {API_URL}')
     # Canvas API key
     API_KEY = token
-    nicknames={'a301':'ATSC 301 Atmospheric Radiation and Remote Sensing',
-               'e340':'EOSC 340 101 Global Climate Change',
+    nicknames={'a301':'ATSC 301 Atmospheric Radiation and Remote Sensing-2018-09',
+               'e340':'EOSC 340 101 Global Climate Change-2018-09',
                'box':'Philip_Sandbox'}
     canvas = Canvas(API_URL, API_KEY)
     courses=canvas.get_courses()
+    all_courses=[(item.id,item.name,item.start_at) for item in courses]
+    #print(f'here are the courses: {all_courses}')
     keep=dict()
-    for item in courses:
+    for theid,thename,the_date in all_courses:
+        try:
+            year,month,rest=the_date.split('-')
+            full_name=f"{thename}-{year}-{month}"
+        except AttributeError:
+            full_name=f"{thename}"
         for shortname,longname in nicknames.items():
-            if item.name.find(longname) > -1:
-                keep[shortname]=item.id
+            if full_name.find(longname) > -1:
+                keep[shortname]=theid
+                print(f"hit {shortname} {the_date}")
+                print(f"{full_name.find(longname)} -- {full_name} -- {longname}")
     return canvas,keep
