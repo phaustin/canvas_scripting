@@ -14,6 +14,13 @@ from canvasapi import Canvas
 logging.captureWarnings(True)  # [noqa]
 
 
+def merge_two(df_left, df_right):
+    df_return = pd.merge(
+        df_left, df_right, how="left", left_index=True, right_index=True, sort=False
+    )
+    return pd.DataFrame(df_return, copy=True)
+
+
 def make_tuple(in_dict, tupname="values"):
     """
     make a named tuple from a dictionary
@@ -76,7 +83,7 @@ def stringify_df_column(df, id_col=None):
 def clean_id(df, id_col=None, drop=True):
     """
     give student numbers as floating point, turn
-    into ints
+    into ints and set index
 
     Parameters
     ----------
@@ -97,7 +104,7 @@ def clean_id(df, id_col=None, drop=True):
     the_id_vector = df[id_col].values
     the_id_ints = [int(item) for item in the_id_vector]
     df[id_col] = the_id_ints
-    df = df.set_index(id_col, drop=drop)
+    df.set_index(id_col, drop=drop, inplace=True)
     return pd.DataFrame(df, copy=True)
 
 
